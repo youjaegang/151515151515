@@ -1,0 +1,237 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>랜덤 좌석 배치</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-size: 2.5em;
+        }
+
+        .controls {
+            margin-bottom: 30px;
+        }
+
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .seating-chart {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .row {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-right: 15px;
+            gap: 10px;
+        }
+
+        .seating-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .seat {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .seat:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .seat.animate {
+            animation: pulse 0.6s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .info {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            .seat {
+                width: 45px;
+                height: 45px;
+                font-size: 14px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🎲 랜덤 좌석 배치</h1>
+    
+    <div class="controls">
+        <button onclick="generateSeating()">새로운 좌석 배치</button>
+    </div>
+    
+    <div class="seating-chart">
+        <div id="seating-container" class="seating-container">
+            <!-- 좌석이 여기에 동적으로 생성됩니다 -->
+        </div>
+        <div class="info">
+            총 29명 | 1~4열: 6명씩 | 5열: 5명
+        </div>
+    </div>
+
+    <script>
+        // 1부터 29까지의 번호 배열 생성
+        function createNumberArray() {
+            const numbers = [];
+            for (let i = 1; i <= 29; i++) {
+                numbers.push(i);
+            }
+            return numbers;
+        }
+
+        // 배열을 랜덤하게 섞는 함수 (Fisher-Yates shuffle)
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // 좌석 배치 생성 함수
+        function generateSeating() {
+            const container = document.getElementById('seating-container');
+            const numbers = shuffleArray(createNumberArray());
+            
+            // 기존 좌석 제거
+            container.innerHTML = '';
+            
+            let numberIndex = 0;
+            
+            // 1~4열: 각각 6명씩 (세로로)
+            for (let col = 1; col <= 4; col++) {
+                const colDiv = document.createElement('div');
+                colDiv.className = 'row';
+                
+                for (let seat = 1; seat <= 6; seat++) {
+                    const seatDiv = document.createElement('div');
+                    seatDiv.className = 'seat';
+                    seatDiv.textContent = numbers[numberIndex];
+                    
+                    // 애니메이션 지연 효과
+                    setTimeout(() => {
+                        seatDiv.classList.add('animate');
+                    }, (numberIndex * 50));
+                    
+                    colDiv.appendChild(seatDiv);
+                    numberIndex++;
+                }
+                
+                container.appendChild(colDiv);
+            }
+            
+            // 5열: 5명 (세로로)
+            const lastColDiv = document.createElement('div');
+            lastColDiv.className = 'row';
+            
+            for (let seat = 1; seat <= 5; seat++) {
+                const seatDiv = document.createElement('div');
+                seatDiv.className = 'seat';
+                seatDiv.textContent = numbers[numberIndex];
+                
+                // 애니메이션 지연 효과
+                setTimeout(() => {
+                    seatDiv.classList.add('animate');
+                }, (numberIndex * 50));
+                
+                lastColDiv.appendChild(seatDiv);
+                numberIndex++;
+            }
+            
+            container.appendChild(lastColDiv);
+        }
+
+        // 페이지 로드 시 초기 좌석 배치 생성
+        window.addEventListener('load', generateSeating);
+    </script>
+</body>
+</html>
